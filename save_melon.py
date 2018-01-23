@@ -11,12 +11,15 @@
 8. melon.html에 해당 내용이 잘 저장되어있는지 확인
 9. 이 모든 내용을 save()함수에 넣고, save_melon모듈의 __name__이 "__main__" 일때만 실행하도록 함
 """
-# 'https://www.melon.com/chart/index.htm'의 내용을
-# melon.txt파일에 저장
+import requests
 
 
 def save():
-    # 저장로직 실행
-    pass
+    response = requests.get('https://www.melon.com/chart/index.htm')
+    source = response.text
+    with open('melon.html', 'wt') as f:
+        f.write(source)
 
-# 이 모듈을 파이썬으로 실행시 save()가 호출되도록 함
+
+if __name__ == '__main__':
+    save()
