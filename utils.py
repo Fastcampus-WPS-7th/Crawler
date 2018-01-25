@@ -74,5 +74,23 @@ def get_top100_list(refresh_html=False):
             'url_img_cover': url_img_cover,
             'artist': artist,
             'album': album,
+            'song_id': '<추가해주세요>',
         })
     return result
+
+
+def get_song_detail(song_id):
+    """
+    song_id에 해당하는 곡 정보 dict를 반환
+    위의 get_top100_list의 각 곡 정보에도 song_id가 들어가도록 추가
+
+    http://www.melon.com/song/detail.htm?songId=30755375
+    위 링크를 참조
+
+    파일명
+        song_detail_{song_id}.html
+
+    :param song_id: 곡 정보 dict
+    :return:
+    """
+    pass
