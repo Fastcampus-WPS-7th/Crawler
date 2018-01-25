@@ -1,79 +1,52 @@
 import re
 
-# Patterns
-# <div class="ellipsis rank01> ~ </div>부분의 텍스트
-PATTERN_DIV_RANK01 = re.compile(r'<div class="ellipsis rank01">.*?</div>', re.DOTALL)
-# <a href=....>(내용)</a>
-PATTERN_A_CONTENT = re.compile(r'<a.*?>(.*?)</a>')
+from utils import *
 
-
-def get_tag_attribute(attribute_name, tag_string):
-    """
-    특정 tag문자열(tag_string)에서 attribute_name에 해당하는 속성의 값을 리턴하는 함수
-    :param attribute_name: 태그가 가진 속성명
-    :return: 속성이 가진 값
-    """
-    # 문자열 포맷에 이름 붙이고, format()에서 키워드인수로 전달
-    p = re.compile(r'^<.*?{attribute_name}="(?P<value>.*?)".*?>'.format(
-        attribute_name=attribute_name
-    ), re.DOTALL)
-    m = re.search(p, tag_string)
-    if m:
-        return m.group('value')
-    return ''
-
-
-# example1 = '<a href="https://google.co.kr">Google</a>'
-example1 = '<div><span class="sdf">ASDF</span></div>'
-get_tag_attribute('href', example1)
-
-
-def get_tag_content(tag_string):
-    """
-    특정 tag문자열(tag_string)이 가진 내용을 리턴
-    tag문자열이 스스로 열고 닫는 태그 (ex: img태그)일 경우엔 공백을 반환
-    :param tag_string:
-    :return:
-    """
-
-
-example2 = '<div>Content</div>'
-get_tag_content(example2)
-# -> Content
-
-
-# 로컬 HTML문서 불러오기
 source = open('melon.html', 'rt').read()
 
-# 전체 문서에서 PATTERN_DIV_RANK01에 해당하는 match object목록을 순회
-match_list = re.finditer(PATTERN_DIV_RANK01, source)
-for match_div_rank01 in match_list:
-    # 각 순회에서 매치된 전체 문자열 (<div clas... ~ </div>)부분을 가져옴
-    div_rank01_content = match_div_rank01.group()
+# <a href=....>(내용)</a>
+PATTERN_A_CONTENT = re.compile(r'<a.*?>(.*?)</a>')
+# <tr class="lst50"></tr>
+PATTERN_TR = re.compile(r'<tr.*?class="lst50".*?>.*?</tr>', re.DOTALL)
+# <td>...</td> 요소를 찾기 위한 정규표현식
+PATTERN_TD = re.compile(r'<td.*?>.*?</td>', re.DOTALL)
+# img태그의 'src'내용을 가져오는 정규표현식
+PATTERN_IMG = re.compile(r'<img.*?src="(.*?)".*?>', re.DOTALL)
+# rank
+PATTERN_RANK = re.compile(r'<span.*?class=".*?rank.*?".*?>(.*?)</span>', re.DOTALL)
 
-    # 부분 문자열에서 a태그의 내용을 title변수에 할당
-    match_title = re.search(PATTERN_A_CONTENT, div_rank01_content)
-    title = match_title.group(1)
-    print(title)
+# 결과 dict리스트를 담을 result 리스트 변수
+result = []
 
-"""
-숙제
-(좋아요 개수는 하지마세요)
-print(chart) 했을 때
-[
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-    {'rank': 1, 'title': '다른사람을 사랑하고 있어', 'artist': '수지 (SUZY)', 'album': 'Faces of Love',}
-]
-이렇게 나오도록 나머지 정규표현식 구현을 완성
-"""
+# lst50이라는 class를 가진 tr요소들을 모두 찾아 순회
+for tr in re.finditer(PATTERN_TR, source):
+    # 각 tr요소가 가진 td list를 td_list에 할당. 인덱스 연산을 할 것이므로 findall사용
+    td_list = re.findall(PATTERN_TD, tr.group())
 
-"""
+    # 값들이 들어있는 태그들
+    td_rank = td_list[1]
+    td_img_cover = td_list[3]
+    td_title_artist = td_list[5]
+    div_title = find_tag('div', td_title_artist, class_='rank01')
+    div_artist = find_tag('div', td_title_artist, class_='rank02')
+    td_album = td_list[6]
 
-    
-"""
+    # 각 태그들에서 값을 찾음
+    rank = re.search(PATTERN_RANK, td_rank).group(1)
+    url_img_cover = re.search(PATTERN_IMG, td_img_cover).group(1)
+    title_a_tag = find_tag('a', div_title)
+    title = get_tag_content(title_a_tag)
+    artist = re.search(PATTERN_A_CONTENT, div_artist).group(1)
+    album = re.search(PATTERN_A_CONTENT, td_album).group(1)
+
+    # 결과 리스트에 dict하나씩 생성해서 append
+    result.append({
+        'rank': rank,
+        'title': title,
+        'url_img_cover': url_img_cover,
+        'artist': artist,
+        'album': album,
+    })
+
+for item in result:
+    print(item)
