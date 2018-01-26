@@ -142,8 +142,14 @@ def get_song_detail(song_id, refresh_html=False):
     genre = description_dict.get('장르')
 
     div_lyrics = soup.find('div', id='d_video_summary')
-    lyrics_list = [item.strip() for item in div_lyrics if isinstance(item, NavigableString)]
-    lyrics = '\n'.join(lyrics_list)
+
+    lyrics_list = []
+    for item in div_lyrics:
+        if item.name == 'br':
+            lyrics_list.append('\n')
+        elif type(item) is NavigableString:
+            lyrics_list.append(item.strip())
+    lyrics = ''.join(lyrics_list)
 
     return {
         'title': title,
