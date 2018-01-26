@@ -2,7 +2,7 @@ import os
 import re
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 # utils가 있는
 PATH_MODULE = os.path.abspath(__file__)
@@ -140,3 +140,22 @@ def get_song_detail(song_id, refresh_html=False):
     album = description_dict.get('앨범')
     release_date = description_dict.get('발매일')
     genre = description_dict.get('장르')
+
+    div_lyrics = soup.find('div', id='d_video_summary')
+    lyrics_list = [item.strip() for item in div_lyrics if isinstance(item, NavigableString)]
+    lyrics = '\n'.join(lyrics_list)
+
+    return {
+        'title': title,
+        'artist': artist,
+        'album': album,
+        'release_date': release_date,
+        'genre': genre,
+        'lyrics': lyrics,
+        # 작사/작곡은 주말 숙제 포함
+        'producers': {
+            '작사': ['별들의 전쟁'],
+            '작곡': ['David Amber', 'Sean Alexander'],
+            '편곡': ['Avenue52'],
+        },
+    }
