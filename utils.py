@@ -61,6 +61,8 @@ def get_top100_list(refresh_html=False):
         artist = tr.find('div', class_='rank02').find('a').text
         album = tr.find('div', class_='rank03').find('a').text
         url_img_cover = tr.find('a', class_='image_typeAll').find('img').get('src')
+        song_id_href = tr.find('a', class_='song_info').get('href')
+        song_id = re.search(r"\('(\d+)'\)", song_id_href).group(1)
         # http://cdnimg.melon.co.kr/cm/album/images/101/28/855/10128855_500.jpg/melon/resize/120/quality/80/optimize
         # .* -> 임의 문자의 최대 반복
         # \. -> '.' 문자
@@ -74,7 +76,7 @@ def get_top100_list(refresh_html=False):
             'url_img_cover': url_img_cover,
             'artist': artist,
             'album': album,
-            'song_id': '<추가해주세요>',
+            'song_id': song_id,
         })
     return result
 
