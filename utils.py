@@ -14,7 +14,7 @@ def get_top100_list(refresh_html=False):
     :return: 곡 정보 dict의 list
     """
     # utils가 있는
-    path_module = os.path.abspath(__name__)
+    path_module = os.path.abspath(__file__)
     print(f'path_module: \n{path_module}')
 
     # 프로젝트 컨테이너 폴더 경로
